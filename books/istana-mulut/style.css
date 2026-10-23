@@ -441,3 +441,5 @@ dialog[open] { animation: fadeIn .25s; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+.shelf-link { align-self: flex-start; font-size: var(--fs-sm); font-weight: 700; color: var(--pink-d); text-decoration: none; background: rgba(255,255,255,.75); border: 2px solid var(--line); border-radius: 99px; padding: .15em .9em; }
