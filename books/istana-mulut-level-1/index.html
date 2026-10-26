@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Istana Mulut Putri Iris · Level 1</title>
+  <meta name="description" content="Buku cerita interaktif untuk menemani Putri Iris makan: suap sendiri, kunyah di geraham, telan bersama Cinderella.">
+  <meta name="theme-color" content="#f9a8d4">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Istana Iris">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Muncul hanya saat perangkat dalam posisi portrait -->
+<div id="rotate" role="alert">
+  <div class="rotate-phone">📱</div>
+  <h2>Putar layar ke posisi landscape ya!</h2>
+  <p>Istana Mulut Putri Iris paling bagus dilihat menyamping.<br>Kalau tidak berputar, matikan kunci rotasi layar.</p>
+</div>
+
+<div id="app">
+
+  <!-- ============ BAR ATAS ============ -->
+  <header id="topbar">
+    <button class="tb-btn" id="btnHome" aria-label="Kembali ke beranda">🏠</button>
+    <div class="tb-title" id="tbTitle">Istana Mulut Putri Iris</div>
+    <div class="tb-spacer"></div>
+    <div class="stars-pill" title="Bintang Mahkota Iris"><span>🌟</span><b id="starCount">0</b></div>
+    <button class="tb-btn" id="btnSound" aria-label="Suara aktif / mati">🔊</button>
+    <button class="tb-btn" id="btnFull" aria-label="Layar penuh">⛶</button>
+    <button class="tb-btn" id="btnParent" aria-label="Panduan orang tua (tahan 1 detik)" title="Orang tua: tahan 1 detik">👪</button>
+  </header>
+
+  <main id="screens">
+
+    <!-- ============ BERANDA ============ -->
+    <section class="screen" id="screen-home">
+      <img class="home-bg" src="assets/hero.webp" alt="" decoding="async">
+      <div class="home-shade"></div>
+      <div class="home-card">
+        <div class="crown-badge">👑</div>
+        <div class="level-badge">Level 1</div>
+        <h1>Istana Mulut<br>Putri Iris</h1>
+        <p class="home-sub">Buku cerita interaktif &amp; teman makan para Princess</p>
+        <div class="home-actions">
+          <button class="big-btn pink" id="goStory"><span>📖</span> Baca Cerita</button>
+          <button class="big-btn gold" id="goMeal"><span>🍽️</span> Mulai Makan</button>
+        </div>
+        <div class="home-foot" id="homeFoot"></div>
+        <a class="shelf-link" href="../../">📚 Rak Buku</a>
+      </div>
+    </section>
+
+    <!-- ============ BUKU CERITA ============ -->
+    <section class="screen" id="screen-story">
+      <div class="story-body" id="storyBody">
+        <div class="stage" id="storyStage"></div>
+        <aside class="story-side">
+          <div class="chapter-badge" id="chapterBadge"></div>
+          <h2 id="storyTitle"></h2>
+          <p id="storyText"></p>
+          <div class="mission" id="storyMission"></div>
+          <div class="activity" id="storyAct"></div>
+        </aside>
+      </div>
+      <nav class="story-nav">
+        <button class="nav-btn" id="btnPrev" aria-label="Halaman sebelumnya">⬅️ <span>Sebelumnya</span></button>
+        <div class="dots" id="storyDots"></div>
+        <button class="nav-btn read" id="btnRead" aria-label="Bacakan halaman ini">🗣️ <span>Bacakan</span></button>
+        <button class="nav-btn next" id="btnNext" aria-label="Halaman berikutnya"><span id="nextLabel">Lanjut</span> ➡️</button>
+      </nav>
+    </section>
+
+    <!-- ============ TEMAN MAKAN ============ -->
+    <section class="screen" id="screen-meal">
+      <div class="meal-body">
+        <div class="stage" id="mealStage"></div>
+        <aside class="meal-side">
+          <div class="food-row" id="foodRow" role="radiogroup" aria-label="Pilih makanan"></div>
+
+          <div class="step-card" id="stepCard">
+            <div class="step-head">
+              <div class="step-num" id="stepNum">1</div>
+              <div>
+                <div class="step-title" id="stepTitle"></div>
+                <div class="step-sub" id="stepSub"></div>
+              </div>
+            </div>
+            <div class="step-art" id="stepArt" aria-hidden="true"></div>
+            <div class="step-actions" id="stepActions"></div>
+          </div>
+
+          <div class="meal-stats">
+            <div class="bar-wrap">
+              <div class="bar-label"><span>Suapan hari ini</span><b id="biteText">0 / 15</b></div>
+              <div class="bar"><i id="biteBar"></i><span class="bar-crown">👑</span></div>
+            </div>
+            <div class="timer" id="mealTimer" title="Lama makan">⏱ 00:00</div>
+          </div>
+
+          <div class="cue-row" aria-label="Panggilan Princess untuk orang tua">
+            <button class="cue" data-cue="focus">🍎 Fokus</button>
+            <button class="cue" data-cue="posture">👑 Duduk Anggun</button>
+            <button class="cue" data-cue="spoon">🥄 Sendok Sendiri</button>
+            <button class="cue" data-cue="chew">🦷 Kunyah</button>
+            <button class="cue" data-cue="swallow">👠 Telan</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Gelembung pesan Princess -->
+  <div id="toast" class="toast" hidden>
+    <div class="toast-av" id="toastAv">🍎</div>
+    <div class="toast-body"><b id="toastName"></b><span id="toastMsg"></span></div>
+  </div>
+
+  <!-- Lapisan konfeti -->
+  <div id="fx" aria-hidden="true"></div>
+
+  <!-- Hitung mundur 3-2-1 -->
+  <div id="countdown" aria-hidden="true"></div>
+
+  <!-- Perayaan -->
+  <dialog id="finale">
+    <div class="finale-card">
+      <div class="finale-crown">👑</div>
+      <h2 id="finaleTitle">Hore, Putri Iris Hebat!</h2>
+      <p id="finaleText"></p>
+      <div class="finale-actions">
+        <button class="big-btn gold" id="finaleMore">🍽️ Lanjut Makan</button>
+        <button class="big-btn pink" id="finaleDone">🎉 Selesai</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Panduan orang tua -->
+  <dialog id="parentDlg">
+    <div class="parent-card">
+      <div class="parent-head">
+        <h2>💡 Panduan Orang Tua</h2>
+        <button class="tb-btn" id="parentClose" aria-label="Tutup">✕</button>
+      </div>
+      <div class="parent-scroll">
+        <p class="lead">Iris sebenarnya <strong>sudah punya kemampuan mengunyah yang baik</strong> (lancar dengan buah, udon, donat, pempek kulit). Tantangan di nasi goreng, ayam, dan telur lebih karena bosan tekstur, terbiasa menunggu disuapi, dan hilang fokus.</p>
+
+        <div class="tips">
+          <div class="tip rose"><h3>1. Malas pakai geraham</h3><p>Hindari "Ayo kunyah yang benar!". Coba: <em>"Mulan di geraham kanan sama Belle di kiri lagi ngantuk. Yuk oper ayamnya ke belakang, kita bangunin 5 kali: kres, kres, kres!"</em></p></div>
+          <div class="tip purple"><h3>2. Makanan halus tapi ditahan</h3><p>Beri aba-aba: <em>"Belle bilang telurnya sudah halus! Lonceng Cinderella bunyi: satu, dua, tiga… glek!"</em> Beri seteguk air hangat bila perlu di awal latihan.</p></div>
+          <div class="tip amber"><h3>3. Tolah-toleh, ngulet, bengong</h3><p>Pastikan <strong>telapak kaki menapak</strong> pijakan dan duduk tegak. Ajak: <em>"Ups, lantai istana goyang! Yuk duduk anggun menghadap piring."</em> Duduk tegak juga lebih aman saat menelan.</p></div>
+          <div class="tip green"><h3>4. Belajar makan mandiri</h3><p>Biarkan Iris menyendok sendiri 3–4 suapan pertama, lalu tawarkan bantuan hanya jika dia minta. Puji usahanya, bukan hanya habisnya.</p></div>
+        </div>
+
+        <div class="note">
+          <strong>Catatan penggunaan:</strong> aplikasi ini dibuat sebagai <em>pendamping</em> makan, bukan tontonan. Idealnya baca cerita dulu bersama, lalu pakai mode "Teman Makan" sebagai pengingat. Jangan memaksa atau mengancam saat makan, dan jangan biarkan anak makan tanpa pengawasan. Matikan layar setelah makan selesai. Jika kesulitan makan menetap (sering tersedak, menolak banyak jenis makanan, berat badan tidak naik), konsultasikan ke dokter anak.
+        </div>
+
+        <h3 class="set-h">⚙️ Pengaturan</h3>
+        <div class="settings">
+          <label>Target suapan per makan
+            <select id="setGoal">
+              <option>5</option><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option><option>40</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" id="setAutoRead"> Bacakan cerita otomatis</label>
+          <label class="check"><input type="checkbox" id="setSound"> Suara &amp; efek aktif</label>
+          <div class="set-btns">
+            <button class="mini" id="setResetBites">🔄 Mulai hitungan suapan baru</button>
+            <button class="mini danger" id="setResetAll">🗑️ Reset semua bintang</button>
+          </div>
+        </div>
+
+        <details class="install">
+          <summary>📲 Tips pasang sebagai aplikasi layar penuh</summary>
+          <p><strong>iPhone/iPad (Safari):</strong> tombol Bagikan → "Tambah ke Layar Utama".<br>
+          <strong>Android (Chrome):</strong> menu ⋮ → "Pasang aplikasi" / "Tambahkan ke layar utama".<br>
+          Setelah terpasang, aplikasi terbuka layar penuh dan tetap bisa dipakai tanpa internet.</p>
+        </details>
+      </div>
+    </div>
+  </dialog>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -4,7 +4,8 @@ Satu repo, banyak buku cerita interaktif. Halaman utama (`index.html`) adalah **
 
 ```
 index.html                 ← rak buku (daftar BOOKS)
-books/istana-mulut/        ← buku 1: Istana Mulut Putri Iris
+books/istana-mulut-level-1/ ← Istana Mulut Putri Iris, Level 1 (7 bab, dasar)
+books/istana-mulut/        ← Istana Mulut Putri Iris, Level 2 (10 bab)
   index.html style.css app.js sw.js manifest.webmanifest assets/
 ```
 
@@ -18,7 +19,7 @@ books/istana-mulut/        ← buku 1: Istana Mulut Putri Iris
 
 ---
 
-# Buku 1: Istana Mulut Putri Iris 👑 (Level 2)
+# Istana Mulut Putri Iris 👑 (Level 2; Level 1 ada di `books/istana-mulut-level-1/`)
 
 Buku cerita interaktif + teman makan untuk membantu Iris makan: **suap sendiri → kunyah di geraham (Mulan & Belle) → telan bersama Cinderella**.
 Ada di `books/istana-mulut/`. Dibuat untuk layar **landscape** di tablet dan HP. Situs statis murni (HTML/CSS/JS), tanpa build.
