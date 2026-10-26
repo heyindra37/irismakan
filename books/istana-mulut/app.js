@@ -32,23 +32,27 @@ const wait = ms => new Promise(res => later(res, ms));
 function clearTimers() { timers.forEach(clearTimeout); timers.clear(); }
 
 /* ---------- penyimpanan ---------- */
-const store = {
-  get(k, d) { try { const v = localStorage.getItem('iris.' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('iris.' + k, JSON.stringify(v)); } catch { /* mode privat */ } }
-};
+/* store = progres buku ini (awalan sendiri, terpisah dari buku lain);
+   shared = preferensi perangkat yang dipakai semua buku (suara, bunyi). */
+const makeStore = prefix => ({
+  get(k, d) { try { const v = localStorage.getItem(prefix + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(prefix + k, JSON.stringify(v)); } catch { /* mode privat */ } }
+});
+const store = makeStore('iris2.');
+const shared = makeStore('iris.');
 const localDay = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
 
 /* pengaturan lama (versi tanpa rak buku) dibaca sebagai cadangan */
 const legacy = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const S = {
-  stars: store.get('stars', parseInt(legacy('iris_princess_stars'), 10) || 0),
-  sound: store.get('sound', true),
-  autoRead: store.get('autoRead', true),
+  stars: store.get('stars', 0),
+  sound: shared.get('sound', true),
+  autoRead: shared.get('autoRead', true),
   goal: store.get('goal', 15),
-  pitch: store.get('pitch', parseFloat(legacy('iris_voice_pitch')) || 1.35),
-  rate: store.get('rate', parseFloat(legacy('iris_voice_rate')) || 1.05),
-  voiceURI: store.get('voiceURI', legacy('iris_voice_uri') || ''),
-  chime: store.get('chime', legacy('iris_chime_only') === 'true')
+  pitch: shared.get('pitch', parseFloat(legacy('iris_voice_pitch')) || 1.35),
+  rate: shared.get('rate', parseFloat(legacy('iris_voice_rate')) || 1.05),
+  voiceURI: shared.get('voiceURI', legacy('iris_voice_uri') || ''),
+  chime: shared.get('chime', legacy('iris_chime_only') === 'true')
 };
 let bitesRec = store.get('bites', null);
 if (!bitesRec || bitesRec.d !== localDay()) bitesRec = { d: localDay(), n: 0, fin: 0 };
@@ -946,7 +950,7 @@ function syncSound() {
   $('#setSound').checked = S.sound;
   if (!S.sound) hush();
 }
-$('#btnSound').addEventListener('click', () => { S.sound = !S.sound; store.set('sound', S.sound); syncSound(); });
+$('#btnSound').addEventListener('click', () => { S.sound = !S.sound; shared.set('sound', S.sound); syncSound(); });
 
 const de = document.documentElement;
 const reqFS = de.requestFullscreen || de.webkitRequestFullscreen;
@@ -977,8 +981,8 @@ $('#btnFull').addEventListener('click', async () => {
 })();
 
 $('#setGoal').addEventListener('change', e => { S.goal = parseInt(e.target.value, 10) || 15; store.set('goal', S.goal); bitesRec.fin = bitesRec.n >= S.goal ? 1 : 0; saveBites(); updateBites(); });
-$('#setAutoRead').addEventListener('change', e => { S.autoRead = e.target.checked; store.set('autoRead', S.autoRead); });
-$('#setSound').addEventListener('change', e => { S.sound = e.target.checked; store.set('sound', S.sound); syncSound(); });
+$('#setAutoRead').addEventListener('change', e => { S.autoRead = e.target.checked; shared.set('autoRead', S.autoRead); });
+$('#setSound').addEventListener('change', e => { S.sound = e.target.checked; shared.set('sound', S.sound); syncSound(); });
 $('#setResetBites').addEventListener('click', () => { bitesRec = { d: localDay(), n: 0, fin: 0 }; saveBites(); meal.t0 = 0; updateBites(); updateTimer(); enterHome(); });
 $('#setResetAll').addEventListener('click', () => { if (confirm('Reset semua bintang Iris menjadi 0?')) { S.stars = 0; store.set('stars', 0); updateStars(); enterHome(); } });
 
@@ -990,10 +994,10 @@ $('#setResetAll').addEventListener('click', () => { if (confirm('Reset semua bin
   const close = () => { hush(); dlg.close(); };
   $('#voiceClose').addEventListener('click', close); $('#voiceSave').addEventListener('click', close);
   dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
-  pitch.addEventListener('input', () => { S.pitch = parseFloat(pitch.value); store.set('pitch', S.pitch); $('#voicePitchVal').textContent = S.pitch; });
-  rate.addEventListener('input', () => { S.rate = parseFloat(rate.value); store.set('rate', S.rate); $('#voiceRateVal').textContent = S.rate; });
-  sel.addEventListener('change', () => { S.voiceURI = sel.value; store.set('voiceURI', S.voiceURI); });
-  chime.addEventListener('change', () => { S.chime = chime.checked; store.set('chime', S.chime); });
+  pitch.addEventListener('input', () => { S.pitch = parseFloat(pitch.value); shared.set('pitch', S.pitch); $('#voicePitchVal').textContent = S.pitch; });
+  rate.addEventListener('input', () => { S.rate = parseFloat(rate.value); shared.set('rate', S.rate); $('#voiceRateVal').textContent = S.rate; });
+  sel.addEventListener('change', () => { S.voiceURI = sel.value; shared.set('voiceURI', S.voiceURI); });
+  chime.addEventListener('change', () => { S.chime = chime.checked; shared.set('chime', S.chime); });
   $('#voiceTest').addEventListener('click', () => {
     play('sparkle');
     if (S.chime) play('bell'); else say('Halo Putri Iris sayang! Ini suara Princess yang ceria! Ingat ya, jangan tahan makanan di lidah Cinderella, langsung oper ke geraham Mulan dan Belle!');

@@ -13,7 +13,7 @@ books/istana-mulut/        ← Istana Mulut Putri Iris, Level 2 (10 bab)
 1. Salin folder: `cp -r books/istana-mulut books/nama-buku-baru`
 2. Di folder baru: ganti gambar di `assets/` (`hero.webp`, `palace.webp`, ikon), isi cerita (`PAGES`, dst.) di `app.js`, judul/nama di `index.html` dan `manifest.webmanifest`.
 3. Di `sw.js` ubah `VERSION` ke nama unik (mis. `nama-buku-baru-v1`) dan sesuaikan daftar `SHELL` bila nama file gambar berubah.
-4. Di `app.js` ubah awalan penyimpanan `'iris.'` bila ingin bintang buku ini terpisah dari buku lain.
+4. Di `app.js` ubah awalan progres buku (`makeStore('iris2.')`) menjadi awalan unik, mis. `'iris3.'`, supaya bintang & suapan buku baru terpisah dari buku lain. Preferensi suara memakai `shared` (`'iris.'`) dan sengaja dipakai bersama semua buku. Level 1 memakai awalan `'iris.'`, Level 2 `'iris2.'`.
 5. Daftarkan di rak: tambah satu objek di array `BOOKS` pada `index.html` root (folder, judul, deskripsi, cover).
 6. Commit dan push ke `main`; Vercel otomatis deploy.
 
