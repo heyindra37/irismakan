@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <title>Istana Mulut Putri Iris</title>
+  <title>Istana Mulut Putri Iris · Level 2</title>
   <meta name="description" content="Buku cerita interaktif untuk menemani Putri Iris makan: suap sendiri, kunyah di geraham, telan bersama Cinderella.">
   <meta name="theme-color" content="#f9a8d4">
   <meta name="mobile-web-app-capable" content="yes">
@@ -35,6 +35,7 @@
     <div class="tb-title" id="tbTitle">Istana Mulut Putri Iris</div>
     <div class="tb-spacer"></div>
     <div class="stars-pill" title="Bintang Mahkota Iris"><span>🌟</span><b id="starCount">0</b></div>
+    <button class="tb-btn" id="btnVoice" aria-label="Pengaturan suara Princess">🎀</button>
     <button class="tb-btn" id="btnSound" aria-label="Suara aktif / mati">🔊</button>
     <button class="tb-btn" id="btnFull" aria-label="Layar penuh">⛶</button>
     <button class="tb-btn" id="btnParent" aria-label="Panduan orang tua (tahan 1 detik)" title="Orang tua: tahan 1 detik">👪</button>
@@ -48,8 +49,9 @@
       <div class="home-shade"></div>
       <div class="home-card">
         <div class="crown-badge">👑</div>
+        <div class="level-badge">Level 2 ✨</div>
         <h1>Istana Mulut<br>Putri Iris</h1>
-        <p class="home-sub">Buku cerita interaktif &amp; teman makan para Princess</p>
+        <p class="home-sub">Estafet Lidah Cinderella • Ketukan Kunyah Cepat • Sensor Bubur Bintang</p>
         <div class="home-actions">
           <button class="big-btn pink" id="goStory"><span>📖</span> Baca Cerita</button>
           <button class="big-btn gold" id="goMeal"><span>🍽️</span> Mulai Makan</button>
@@ -107,11 +109,12 @@
           </div>
 
           <div class="cue-row" aria-label="Panggilan Princess untuk orang tua">
+            <button class="cue" data-cue="tongue">👠 Jangan Tahan di Lidah!</button>
+            <button class="cue" data-cue="speed">🎵 Ayo Kunyah Cepat!</button>
+            <button class="cue" data-cue="smooth">🥣 Sudah Halus! Stop Emut!</button>
             <button class="cue" data-cue="focus">🍎 Fokus</button>
             <button class="cue" data-cue="posture">👑 Duduk Anggun</button>
             <button class="cue" data-cue="spoon">🥄 Sendok Sendiri</button>
-            <button class="cue" data-cue="chew">🦷 Kunyah</button>
-            <button class="cue" data-cue="swallow">👠 Telan</button>
           </div>
         </aside>
       </div>
@@ -144,6 +147,30 @@
     </div>
   </dialog>
 
+  <!-- Pengaturan suara Princess -->
+  <dialog id="voiceDlg">
+    <div class="parent-card voice-card">
+      <div class="parent-head">
+        <h2>🎀 Suara Princess</h2>
+        <button class="tb-btn" id="voiceClose" aria-label="Tutup">✕</button>
+      </div>
+      <div class="parent-scroll">
+        <p class="lead">Otomatis memilih suara perempuan berbahasa Indonesia bila perangkat punya, dengan nada ceria.</p>
+        <div class="settings">
+          <label>Suara perangkat <select id="voiceSelect"></select></label>
+          <p id="voiceHint" class="voice-hint"></p>
+          <label>Nada ceria (pitch): <b id="voicePitchVal">1.35</b><input id="voicePitch" type="range" min="1" max="1.6" step="0.05"></label>
+          <label>Kecepatan (tempo): <b id="voiceRateVal">1.05</b><input id="voiceRate" type="range" min="0.85" max="1.25" step="0.05"></label>
+          <label class="check"><input type="checkbox" id="voiceChime"> Mode lonceng musik saja (tanpa suara bicara), bila perangkat hanya punya suara laki-laki</label>
+          <div class="set-btns">
+            <button class="mini" id="voiceTest">🎵 Tes Suara Ceria</button>
+            <button class="mini" id="voiceSave">Simpan &amp; Tutup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Panduan orang tua -->
   <dialog id="parentDlg">
     <div class="parent-card">
@@ -152,17 +179,19 @@
         <button class="tb-btn" id="parentClose" aria-label="Tutup">✕</button>
       </div>
       <div class="parent-scroll">
-        <p class="lead">Iris sebenarnya <strong>sudah punya kemampuan mengunyah yang baik</strong> (lancar dengan buah, udon, donat, pempek kulit). Tantangan di nasi goreng, ayam, dan telur lebih karena bosan tekstur, terbiasa menunggu disuapi, dan hilang fokus.</p>
+        <p class="lead">Iris <strong>sudah berhasil belajar teknik mengunyah</strong> (lancar dengan buah, udon, donat, pempek kulit). Level 2 ini masuk ke <strong>otomatisasi &amp; kecepatan</strong>: tidak menahan makanan di lidah, mengunyah tanpa jeda, dan tahu persis kapan harus menelan.</p>
 
         <div class="tips">
-          <div class="tip rose"><h3>1. Malas pakai geraham</h3><p>Hindari "Ayo kunyah yang benar!". Coba: <em>"Mulan di geraham kanan sama Belle di kiri lagi ngantuk. Yuk oper ayamnya ke belakang, kita bangunin 5 kali: kres, kres, kres!"</em></p></div>
-          <div class="tip purple"><h3>2. Makanan halus tapi ditahan</h3><p>Beri aba-aba: <em>"Belle bilang telurnya sudah halus! Lonceng Cinderella bunyi: satu, dua, tiga… glek!"</em> Beri seteguk air hangat bila perlu di awal latihan.</p></div>
-          <div class="tip amber"><h3>3. Tolah-toleh, ngulet, bengong</h3><p>Pastikan <strong>telapak kaki menapak</strong> pijakan dan duduk tegak. Ajak: <em>"Ups, lantai istana goyang! Yuk duduk anggun menghadap piring."</em> Duduk tegak juga lebih aman saat menelan.</p></div>
-          <div class="tip green"><h3>4. Belajar makan mandiri</h3><p>Biarkan Iris menyendok sendiri 3–4 suapan pertama, lalu tawarkan bantuan hanya jika dia minta. Puji usahanya, bukan hanya habisnya.</p></div>
+          <div class="tip sky"><h3>👠➡️🦷 1. Makanan ditahan di lidah (aturan 3 detik Cinderella)</h3><p>Anak menahan makanan di tengah lidah karena belum terbiasa mendorongnya ke samping. Pakai imajinasi: <em>"Cinderella di lidah pakai gaun pesta dan NGGAK PUNYA GIGI! Dia nggak mau ngunyah! Ayo hitung 1-2-3, lempar ke geraham Mulan!"</em> Tombol <strong>👠 Jangan Tahan di Lidah!</strong> membuat suara Cinderella yang menegur, jadi bukan Bunda yang berulang kali menegur.</p></div>
+          <div class="tip green"><h3>🎵⚡ 2. Mempercepat durasi mengunyah</h3><p>Bila teknik sudah benar tapi lama, penyebabnya sering <strong>jeda antar-kunyahan yang panjang</strong> (mengunyah 2 kali lalu melamun). Di "Teman Makan", nyalakan <strong>🎵 Ketukan cepat otomatis</strong>: irama tiap 1,1 detik membantu menjaga tempo rahang sampai hitungan ke-8.</p></div>
+          <div class="tip amber"><h3>✨🥣✨ 3. Mengenali makanan sudah halus (Sensor Bubur Bintang)</h3><p>Anak 5 tahun sering mengemut makanan lumat karena belum punya <strong>patokan rasa</strong> "siap telan". Ajarkan 2 patokan: <em>"Coba gigit sekali lagi, masih ada yang keras nggak?"</em> dan <em>"Kalau sudah licin menyatu kayak Bubur Bintang / es krim leleh, SUDAH HALUS! Stop emut, GLEK!"</em></p></div>
+          <div class="tip rose"><h3>4. Malas pakai geraham</h3><p>Hindari "Ayo kunyah yang benar!". Coba: <em>"Mulan di geraham kanan sama Belle di kiri lagi ngantuk. Yuk oper ayamnya ke belakang, kita bangunin 5 kali: kres, kres, kres!"</em></p></div>
+          <div class="tip purple"><h3>5. Tolah-toleh, ngulet, bengong</h3><p>Pastikan <strong>telapak kaki menapak</strong> pijakan dan duduk tegak. Ajak: <em>"Ups, lantai istana goyang! Yuk duduk anggun menghadap piring."</em> Duduk tegak juga lebih aman saat menelan.</p></div>
+          <div class="tip green"><h3>6. Belajar makan mandiri</h3><p>Biarkan Iris menyendok sendiri 3–4 suapan pertama, lalu tawarkan bantuan hanya jika dia minta. Puji usahanya, bukan hanya habisnya.</p></div>
         </div>
 
         <div class="note">
-          <strong>Catatan penggunaan:</strong> aplikasi ini dibuat sebagai <em>pendamping</em> makan, bukan tontonan. Idealnya baca cerita dulu bersama, lalu pakai mode "Teman Makan" sebagai pengingat. Jangan memaksa atau mengancam saat makan, dan jangan biarkan anak makan tanpa pengawasan. Matikan layar setelah makan selesai. Jika kesulitan makan menetap (sering tersedak, menolak banyak jenis makanan, berat badan tidak naik), konsultasikan ke dokter anak.
+          <strong>Catatan penggunaan:</strong> aplikasi ini dibuat sebagai <em>pendamping</em> makan, bukan tontonan. Idealnya baca cerita dulu bersama, lalu pakai mode "Teman Makan" sebagai pengingat. Target kecepatan sebaiknya tidak membuat anak tergesa-gesa: jangan memaksa atau mengancam saat makan, dan jangan biarkan anak makan tanpa pengawasan. Matikan layar setelah makan selesai. Jika kesulitan makan menetap (sering tersedak, menolak banyak jenis makanan, berat badan tidak naik), konsultasikan ke dokter anak.
         </div>
 
         <h3 class="set-h">⚙️ Pengaturan</h3>

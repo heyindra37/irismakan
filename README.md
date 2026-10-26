@@ -18,14 +18,15 @@ books/istana-mulut/        ← buku 1: Istana Mulut Putri Iris
 
 ---
 
-# Buku 1: Istana Mulut Putri Iris 👑
+# Buku 1: Istana Mulut Putri Iris 👑 (Level 2)
 
 Buku cerita interaktif + teman makan untuk membantu Iris makan: **suap sendiri → kunyah di geraham (Mulan & Belle) → telan bersama Cinderella**.
 Ada di `books/istana-mulut/`. Dibuat untuk layar **landscape** di tablet dan HP. Situs statis murni (HTML/CSS/JS), tanpa build.
 
 ## Isi
-- **Baca Cerita**: 7 bab, tiap bab punya kegiatan ketuk-ketuk di gambar istana mulut. Ada narasi suara bahasa Indonesia.
-- **Mulai Makan**: pendamping makan langkah demi langkah (pilih makanan → suap → kunyah → telan), hitungan suapan, target, timer, dan tombol "panggilan Princess" untuk orang tua.
+- **Baca Cerita**: 10 bab, tiap bab punya kegiatan ketuk-ketuk di gambar istana mulut. Bab baru Level 2: Aturan Lidah Cinderella (jangan parkir makanan di lidah), Ketukan Kunyah Cepat 1–8, dan Sensor Bubur Bintang. Ada narasi suara bahasa Indonesia.
+- **Mulai Makan**: pendamping makan langkah demi langkah (pilih makanan → suap sendiri → oper dari lidah ke geraham → kunyah cepat dengan ketukan otomatis → sensor Bubur Bintang → telan). Ada peringatan bila makanan ditahan di lidah >4 dtk atau diemut >5 dtk setelah halus, timer per suapan + total, hitungan suapan/target, dan 6 tombol "panggilan Princess" untuk orang tua.
+- **Suara Princess** (tombol 🎀): memilih suara perempuan Indonesia otomatis, atur nada & tempo, atau mode lonceng saja.
 - **Panduan Orang Tua**: tahan tombol 👪 selama 1 detik (supaya tidak terbuka tak sengaja oleh anak). Di sini juga bisa mengatur target suapan.
 - Bintang & hitungan suapan tersimpan di perangkat (localStorage). Bisa dipakai offline setelah dibuka sekali.
 

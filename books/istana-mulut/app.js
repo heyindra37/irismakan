@@ -38,11 +38,17 @@ const store = {
 };
 const localDay = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
 
+/* pengaturan lama (versi tanpa rak buku) dibaca sebagai cadangan */
+const legacy = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const S = {
-  stars: store.get('stars', 0),
+  stars: store.get('stars', parseInt(legacy('iris_princess_stars'), 10) || 0),
   sound: store.get('sound', true),
   autoRead: store.get('autoRead', true),
-  goal: store.get('goal', 15)
+  goal: store.get('goal', 15),
+  pitch: store.get('pitch', parseFloat(legacy('iris_voice_pitch')) || 1.35),
+  rate: store.get('rate', parseFloat(legacy('iris_voice_rate')) || 1.05),
+  voiceURI: store.get('voiceURI', legacy('iris_voice_uri') || ''),
+  chime: store.get('chime', legacy('iris_chime_only') === 'true')
 };
 let bitesRec = store.get('bites', null);
 if (!bitesRec || bitesRec.d !== localDay()) bitesRec = { d: localDay(), n: 0, fin: 0 };
@@ -50,35 +56,37 @@ const saveBites = () => store.set('bites', bitesRec);
 
 /* ---------- tokoh & data ---------- */
 const P = {
-  snow:  { emoji: '🍎', name: 'Snow White', role: 'Gerbang Depan',  color: '#e11d48' },
-  mulan: { emoji: '🗡️', name: 'Mulan',      role: 'Geraham Kanan',  color: '#059669' },
-  belle: { emoji: '🌹', name: 'Belle',      role: 'Geraham Kiri',   color: '#d97706' },
-  cinde: { emoji: '👠', name: 'Cinderella', role: 'Perosotan Emas', color: '#0284c7' }
+  snow:  { emoji: '🍎', name: 'Snow White', role: 'Gerbang Depan',                color: '#e11d48' },
+  mulan: { emoji: '🗡️', name: 'Mulan',      role: 'Komandan Geraham Kanan',       color: '#059669' },
+  belle: { emoji: '🌹', name: 'Belle',      role: 'Penjaga Sensor Bubur Bintang', color: '#d97706' },
+  cinde: { emoji: '👠', name: 'Cinderella', role: 'Penjaga Lidah & Perosotan',    color: '#0284c7' }
 };
 
 const FOODS = [
-  { id: 'nasigoreng', name: 'Nasi Goreng', short: 'N. Goreng', emoji: '🍛', tough: true,  target: 8, desc: 'Nasi goreng! Oper ke Mulan & Belle supaya digiling sampai lembut.' },
-  { id: 'ayam',       name: 'Ayam',        emoji: '🍗', tough: true,  target: 8, desc: 'Ayam gurih bikin Iris kuat! Mulan & Belle paling suka menggiling ayam.' },
-  { id: 'telur',      name: 'Telur',       emoji: '🍳', tough: true,  target: 6, desc: 'Telur bergizi! Kunyah di geraham belakang sampai halus.' },
-  { id: 'buah',       name: 'Buah',        emoji: '🍎', tough: false, target: 6, desc: 'Buah favorit Snow White! Iris sudah jago mengunyahnya.' },
-  { id: 'udon',       name: 'Udon',        emoji: '🍜', tough: false, target: 6, desc: 'Udon lembut kesukaan Iris. Tetap mampir ke Mulan & Belle dulu ya.' },
-  { id: 'donat',      name: 'Donat',       emoji: '🍩', tough: false, target: 6, desc: 'Donat empuk kesukaan Iris! Kunyah rapi tanpa tolah-toleh.' },
-  { id: 'pempek',     name: 'Pempek',      emoji: '🥟', tough: false, target: 7, desc: 'Pempek kulit yang kenyal saja Iris bisa. Apalagi yang lain!' }
+  { id: 'nasigoreng', name: 'Nasi Goreng', short: 'N. Goreng', emoji: '🍛', tough: true,  target: 8, desc: 'Jangan parkir di lidah Cinderella! Langsung oper ke geraham Mulan & Belle sampai jadi Bubur Bintang!' },
+  { id: 'ayam',       name: 'Ayam',        emoji: '🍗', tough: true,  target: 8, desc: 'Ayam gurih! Oper dari lidah Cinderella ke geraham belakang, kunyah cepat sampai tidak ada yang keras!' },
+  { id: 'telur',      name: 'Telur',       emoji: '🍳', tough: true,  target: 6, desc: 'Telur lezat! Kunyah sigap di geraham sampai licin seperti Bubur Bintang lalu langsung GLEK!' },
+  { id: 'buah',       name: 'Buah',        emoji: '🍎', tough: false, target: 6, desc: 'Buah segar! Begitu sudah berair dan lembut di geraham, langsung telan tanpa diemut!' },
+  { id: 'udon',       name: 'Udon',        emoji: '🍜', tough: false, target: 6, desc: 'Udon lembut kesukaan Iris! Giling cepat di Mulan & Belle lalu luncurkan bersama Cinderella!' },
+  { id: 'donat',      name: 'Donat',       emoji: '🍩', tough: false, target: 6, desc: 'Donat empuk! Kunyah dengan ketukan ceria sampai halus seperti krim kue!' },
+  { id: 'pempek',     name: 'Pempek',      emoji: '🥟', tough: false, target: 7, desc: 'Hebat! Pempek kulit saja Iris bisa giling halus, apalagi nasi goreng dan ayam!' }
 ];
 
 const GREET = {
-  snow:  'Halo Putri Iris kesayanganku! Aku senang sekali kalau Iris menyuap makanan sendiri dengan Sendok Sihir!',
-  mulan: 'Hai Putri Iris! Oper ayam dan nasi gorengnya ke pojok belakang ya, biar kugiling sampai halus!',
-  belle: 'Halo Putri Iris yang pintar! Aku jaga geraham yang satunya. Kita kunyah sama-sama sampai lembut!',
-  cinde: 'Kalau makanannya sudah halus, jangan ditahan di pipi ya! Satu, dua, tiga, glek!'
+  snow:  'Halo Putri Iris cantik! Aku senang sekali melihat Iris duduk anggun dan memegang sendok sendiri!',
+  mulan: 'Halo Putri Iris hebat! Supaya makannya tidak lama, kita kunyah pakai irama cepat yuk: kres satu, kres dua, kres tiga, kres empat!',
+  belle: 'Hai Putri Iris pintar! Kalau makanannya sudah tidak ada yang keras dan terasa licin seperti Bubur Bintang, jangan diemut lagi ya, langsung telan!',
+  cinde: 'Hai Putri Iris! Ingat ya, aku di lidah tidak punya gigi dan tidak mau mengunyah! Jangan tahan makanan di lidahku, langsung oper ke geraham Mulan dan Belle ya!'
 };
 
+/* tombol panggilan cepat untuk orang tua: [avatar, judul, pesan] */
 const CUES = {
-  focus:   ['snow',  'Iris, lampu istana mulai redup! Yuk lihat piringnya, kita nyalakan lagi lampunya.'],
-  posture: ['cinde', 'Ups, lantai istana goyang! Duduk anggun menghadap piring dulu ya, Putri Iris.'],
-  spoon:   ['snow',  'Waktunya Tongkat Sihir Sendok! Putri Iris suap sendiri ya.'],
-  chew:    ['mulan', 'Mulan dan Belle mengantuk! Oper makanannya ke geraham belakang, kita bangunkan: kres, kres, kres!'],
-  swallow: ['cinde', 'Ting! Makanannya sudah halus. Satu, dua, tiga, glek! Meluncur ke perut!']
+  tongue: ['👠', 'Panggilan Cinderella di Lidah!', 'Eh Putri Iris sayang! Aku Cinderella di lidah tidak punya gigi dan tidak mau mengunyah lho! Jangan parkir makanannya di lidahku ya, ayo langsung oper ke gigi geraham Mulan dan Belle!'],
+  speed:  ['🎵', 'Komando Kunyah Cepat Mulan & Belle!', 'Ayo Putri Iris, jangan berhenti-berhenti mengunyahnya! Ikuti ketukan cepat Mulan dan Belle yuk: kres satu, kres dua, kres tiga, kres empat, kres lima, sampai halus!'],
+  smooth: ['🥣', 'Ting-Ting! Sensor Bubur Bintang!', 'Putri Iris coba rasakan: makanannya sudah tidak ada yang keras dan sudah licin seperti Bubur Bintang kan? Berarti sudah halus! Jangan diemut lagi ya, langsung satu, dua, tiga, glek!'],
+  focus:  ['🍎', 'Tok-Tok! Pesan dari Snow White', 'Putri Iris sayang, jangan melamun dulu ya! Mulan dan Belle menunggu gerakan gigi geraham Iris supaya makannya cepat selesai!'],
+  posture:['👑', 'Ups! Lantai Istana Mulut Goyang!', 'Kalau Putri Iris tolah-toleh atau ngulet saat makan, lantai istana ikut goyang! Yuk duduk anggun menghadap piring!'],
+  spoon:  ['🥄', 'Tongkat Sihir Sendok Putri Iris', 'Mana tangan cantik Putri Iris yang memegang Sendok Sihir sendiri? Yuk pegang Sendok Sihir sendiri!']
 };
 
 const PRAISE = [
@@ -122,22 +130,49 @@ const sfx = {
 };
 function play(name) { if (!S.sound) return; try { sfx[name](); } catch { /* abaikan */ } }
 
-/* Suara narator (Web Speech API, id-ID bila tersedia) */
+/* Suara narator (Web Speech API). Memprioritaskan suara perempuan berbahasa Indonesia. */
 const hasSpeech = 'speechSynthesis' in window;
-let voice = null;
-function pickVoice() {
-  if (!hasSpeech) return;
-  const vs = speechSynthesis.getVoices();
-  voice = vs.find(v => /^id[-_]ID/i.test(v.lang)) || vs.find(v => /^id/i.test(v.lang)) || null;
+let allVoices = [];
+function scoreVoice(v) {
+  const name = (v.name || '').toLowerCase(), uri = (v.voiceURI || '').toLowerCase(), lang = (v.lang || '').toLowerCase();
+  const combined = name + ' ' + uri;
+  let score = 0;
+  if (/^id([-_]|$)/.test(lang) || combined.includes('indonesia')) score += 500;
+  else if (/^ms([-_]|$)/.test(lang) || combined.includes('malay') || combined.includes('melayu')) score += 350;
+  else return -9999;
+  ['gadis', 'damayanti', 'female', 'perempuan', 'wanita', 'putri', 'siti', 'yasmin', 'hana', 'kartika', 'sari', 'dewi', 'noor', 'amira',
+   '#female', 'female_1', 'female_2', 'female_3', 'wavenet-a', 'wavenet-d', 'standard-a', 'standard-d', 'siri_female', 'natural']
+    .forEach(m => { if (combined.includes(m)) score += 150; });
+  ['ardi', 'laki', 'pria', 'budi', 'putra', 'rizky', 'andi', 'male_1', 'male_2', 'male_3', 'wavenet-b', 'wavenet-c', 'standard-b', 'standard-c', 'siri_male']
+    .forEach(m => { if (combined.includes(m)) score -= 600; });
+  if (/\bmale\b|#male/.test(combined) && !combined.includes('female')) score -= 600;
+  return score;
 }
-if (hasSpeech) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch { /* abaikan */ } }
+const rankedVoices = () => allVoices.map(v => ({ voice: v, score: scoreVoice(v) })).filter(x => x.score > -9000).sort((a, b) => b.score - a.score);
+function currentVoice() {
+  const r = rankedVoices();
+  return (r.find(x => x.voice.voiceURI === S.voiceURI && x.score >= 0) || r[0] || {}).voice || null;
+}
+function loadVoices() {
+  if (!hasSpeech) return;
+  allVoices = speechSynthesis.getVoices() || [];
+  const sel = $('#voiceSelect'), hint = $('#voiceHint'), r = rankedVoices();
+  sel.innerHTML = '';
+  if (!allVoices.length) { hint.textContent = 'Belum ada suara terdeteksi di perangkat ini.'; return; }
+  if (!r.length) { hint.textContent = 'Tidak ada suara Indonesia di perangkat ini. Aktifkan "Mode Lonceng Musik Saja" bila suaranya tidak cocok.'; return; }
+  r.forEach(x => sel.append(h('option', { value: x.voice.voiceURI }, `${x.score >= 600 ? '🌸 Perempuan' : x.score < 0 ? '⚠️ Laki-laki (dihindari)' : '✨ Indonesia'} — ${x.voice.name}`)));
+  const v = currentVoice(); S.voiceURI = v ? v.voiceURI : '';
+  sel.value = S.voiceURI; hint.textContent = `Aktif: ${v ? v.name : '-'} (nada ${S.pitch})`;
+}
+if (hasSpeech) { loadVoices(); try { speechSynthesis.addEventListener('voiceschanged', loadVoices); } catch { /* abaikan */ } }
 function say(text) {
-  if (!S.sound || !hasSpeech || !text) return;
+  if (!S.sound || S.chime || !hasSpeech || !text) return;
   try {
     speechSynthesis.cancel();
+    const v = currentVoice();
     (text.match(/[^.!?]+[.!?]*/g) || [text]).map(s => s.trim()).filter(Boolean).forEach(part => {
       const u = new SpeechSynthesisUtterance(part);
-      u.lang = 'id-ID'; if (voice) u.voice = voice; u.rate = .92; u.pitch = 1.15;
+      u.lang = (v && v.lang) || 'id-ID'; if (v) u.voice = v; u.rate = S.rate; u.pitch = S.pitch;
       speechSynthesis.speak(u);
     });
   } catch { /* abaikan */ }
@@ -307,10 +342,10 @@ function enterHome() {
    ========================================================= */
 const PAGES = [
   {
-    chapter: 'Bab 1 dari 7 · Rahasia Kerajaan',
-    title: 'Selamat Datang di Istana Mulut Putri Iris!',
-    text: 'Tahukah Iris? Di dalam mulut Iris ada <strong>istana ajaib</strong>! Empat sahabat Princess tinggal di sana dan siap membantu Iris makan. Ayo kenalan!',
-    speech: 'Halo Putri Iris yang sebentar lagi berusia lima tahun! Di dalam mulut Iris ada istana ajaib. Empat sahabat Princess tinggal di sana dan siap membantu Iris makan. Ayo kenalan!',
+    chapter: 'Bab 1 dari 10 · Istana Mulut Level 2',
+    title: 'Selamat Datang Kembali, Putri Iris yang Sudah Pintar Mengunyah!',
+    text: 'Hore! <strong>Snow White, Mulan, Belle, dan Cinderella</strong> bertepuk tangan! Hari ini ada <strong>3 Jurus Rahasia Baru</strong> supaya makan Iris makin cepat, tidak capek, dan bisa segera bermain lagi!',
+    speech: 'Hore! Selamat datang kembali Putri Iris cantik! Para Princess bangga sekali karena Iris sudah belajar mengunyah! Yuk kita buka tiga jurus rahasia baru supaya makan Iris makin cepat dan seru!',
     mount(c) {
       const { layer } = c.frame('assets/palace.webp', 'Istana mulut yang ajaib');
       const met = new Set();
@@ -327,15 +362,15 @@ const PAGES = [
     }
   },
   {
-    chapter: 'Bab 2 dari 7 · Tongkat Sihir Sendok',
-    title: 'Putri Hampir 5 Tahun Pegang Sendok Sendiri!',
-    text: '<strong>Snow White</strong> tersenyum: “Putri Iris sudah hampir 5 tahun! Tangan Iris kuat memegang <strong>Sendok Sihir</strong> sendiri.” Setiap suapan mandiri, lampu kristal istana menyala!',
-    speech: 'Snow White berkata: Putri Iris sudah hampir lima tahun! Tangan Iris kuat memegang Sendok Sihir sendiri. Setiap suapan mandiri, lampu kristal istana menyala!',
+    chapter: 'Bab 2 dari 10 · Tongkat Sihir Sendok',
+    title: 'Jurus 1: Tangan Cantik Putri Iris Memegang Sendok Sendiri',
+    text: '<strong>Snow White</strong> melambaikan tangan: “Putri Iris sebentar lagi ulang tahun ke-5, sudah besar! Tangan Iris hebat memegang <strong>Tongkat Sihir Sendok</strong> sendiri!” Saat Iris menyuap sendiri, gerbang istana terbuka lebar.',
+    speech: 'Snow White berkata dengan ceria: Putri Iris sebentar lagi berusia lima tahun! Yuk pegang Tongkat Sihir Sendok dengan tangan cantik Iris sendiri!',
     mount(c) {
       const { layer } = c.frame('assets/hero.webp', 'Putri Iris memegang sendok emas');
       let n = 0;
       const foods = [{ e: '🍛', from: [51, 75] }, { e: '🍳', from: [51, 70] }, { e: '🍗', from: [38, 88] }];
-      const lines = ['Satu suapan mandiri! Tangan Putri Iris pintar sekali!', 'Dua! Lampu kristal istana makin terang!', 'Tiga! Wah, Putri Iris benar-benar hebat memegang sendok sendiri!'];
+      const lines = ['Hebat sekali! Itu suapan mandiri pertama! Sekarang langsung oper dari lidah ke geraham ya!', 'Dua! Lampu kristal istana makin terang!', 'Tiga! Tangan cantik Putri Iris pintar sekali menyuap sendiri!'];
       c.mission('Ketuk sendok emas, suap sendiri 3 kali', 3);
       const spoon = () => {
         const f = foods[n % 3];
@@ -345,23 +380,23 @@ const PAGES = [
         n++; c.progress(Math.min(n, 3)); if (n === 3) c.done(3);
       };
       hot(layer, 64, 41, 14, 30, { onTap: spoon, label: 'Sendok emas' });
-      c.act([{ cls: 'snow', label: '🥄 Ambil Suapan Sendiri!', on: spoon }]);
+      c.act([{ cls: 'snow', label: '🥄 Suap Sendiri!', on: spoon }]);
     }
   },
   {
-    chapter: 'Bab 3 dari 7 · Duduk Anggun',
-    title: 'Jangan Goyang Istana! Duduk Anggun & Fokus',
-    text: 'Kalau Iris <strong>tolah-toleh</strong> atau <strong>ngulet</strong>, lantai istana bergoyang! Kalau <strong>bengong</strong>, lampu istana redup. Putri duduk tegap, kaki menapak, mata menghadap piring.',
-    speech: 'Kalau Iris tolah-toleh atau ngulet, lantai istana bergoyang! Kalau bengong, lampu istana jadi redup. Putri duduk tegap, kaki menapak, dan mata menghadap piring.',
+    chapter: 'Bab 3 dari 10 · Duduk Anggun & Fokus',
+    title: 'Jangan Goyang Istana! Duduk Tegap Tanpa Tolah-Toleh',
+    text: 'Kalau Iris <strong>tolah-toleh</strong>, <strong>ngulet</strong>, atau <strong>bengong</strong>, lantai istana bergoyang dan lampunya meredup! Kalau Putri Iris duduk anggun menghadap piring, semua Princess bisa bekerja cepat sehingga makan Iris cepat selesai!',
+    speech: 'Kalau Putri Iris duduk anggun dan fokus menghadap piring tanpa tolah-toleh atau bengong, semua Princess bisa bekerja super cepat!',
     mount(c) {
       const { frame, layer } = c.frame('assets/hero.webp', 'Putri Iris duduk di kursi istana');
       const note = h('div', { class: 'tag-pill' }, '👑 Putri Iris duduk anggun!');
       layer.append(note);
       c.mission('Coba semuanya, lalu pilih Duduk Anggun');
       const modes = {
-        wiggle:   { cls: 'shake', pill: '😵‍💫 Lantai istana goyang!', who: 'mulan', msg: 'Aduh, lantai istana goyang! Kasihan Snow White hampir jatuh!', snd: 'wobble' },
-        daydream: { cls: 'dim',   pill: '😴 Lampu istana redup…',     who: 'belle', msg: 'Lho, lampunya redup. Iris bengong ya? Yuk nyalakan lagi!', snd: 'wobble' },
-        graceful: { cls: '',      pill: '👑 Putri Iris duduk anggun!', who: 'snow',  msg: 'Nah begitu! Duduk anggun, istana jadi tenang dan terang benderang!', snd: 'sparkle' }
+        wiggle:   { cls: 'shake', pill: '😵‍💫 Istana goyang, makanan susah dioper!', who: 'mulan', msg: 'Aduh, lantai istana goyang! Makanan jadi susah dioper ke geraham Mulan dan Belle!', snd: 'wobble' },
+        daydream: { cls: 'dim',   pill: '😴 Melamun: kunyahan berhenti, makan lama…',  who: 'belle', msg: 'Lho, lampunya redup. Kalau melamun, mengunyahnya berhenti dan makannya jadi lama sekali!', snd: 'wobble' },
+        graceful: { cls: '',      pill: '👑 Putri Iris duduk anggun & fokus!',         who: 'snow',  msg: 'Pintar! Duduk anggun dan fokus membuat makan Putri Iris cepat selesai!', snd: 'sparkle' }
       };
       const btns = {};
       const setMode = m => {
@@ -379,17 +414,52 @@ const PAGES = [
     }
   },
   {
-    chapter: 'Bab 4 dari 7 · Pasukan Geraham',
-    title: 'Bangunkan Mulan & Belle di Geraham Belakang!',
-    text: 'Nasi goreng, telur, dan ayam harus dioper ke pojok belakang. Di sana <strong>Mulan</strong> dan <strong>Belle</strong> menunggu di tahta gigi geraham. Giling bersama: <em>kres, kres, kres</em> sampai halus seperti bubur bintang!',
-    speech: 'Nasi goreng, telur, dan ayam harus dioper ke pojok belakang. Di sana Mulan dan Belle menunggu di tahta gigi geraham. Giling bersama: kres, kres, kres, sampai halus seperti bubur bintang!',
+    chapter: 'Bab 4 dari 10 · Aturan Baru Lidah Cinderella ✨',
+    title: 'Cinderella di Lidah Tidak Mau Mengunyah! Jangan Parkir di Lidah!',
+    text: 'Makanan yang baru masuk mendarat sebentar di <strong>Karpet Lidah Cinderella</strong>. Tapi <strong>Cinderella TIDAK punya gigi dan TIDAK mau mengunyah!</strong> Begitu makanan masuk, langsung lempar ke geraham Mulan dan Belle!',
+    speech: 'Cinderella berkata: Eh Putri Iris sayang! Aku di lidah tidak punya gigi dan tidak mau mengunyah! Kalau makanannya ditahan di lidahku, gaun pestaku jadi berat! Ayo langsung lempar makanannya ke gigi geraham Mulan dan Belle!',
+    mount(c) {
+      const { layer } = c.frame('assets/palace.webp', 'Makanan di karpet lidah Cinderella');
+      const b = bolus(layer, '🍗'); b.show(); b.el.classList.add('alert');
+      const tag = h('div', { class: 'tag-pill' }, '🚫 Cinderella: “Aku nggak mau ngunyah!”');
+      layer.append(tag);
+      c.mission('Bantu Cinderella oper makanan ke geraham', 1);
+      let relayed = false;
+      const relay = side => {
+        if (relayed) return; relayed = true;
+        b.el.classList.remove('alert'); b.to(side); b.bounce(); play('sparkle');
+        tag.textContent = '✅ Lidah Cinderella bersih & lega!';
+        princess('cinde', 'Tring! Begitu dong! Begitu makanan menyentuh lidah, langsung diserahkan ke gigi geraham Mulan dan Belle! Terima kasih Putri Iris!');
+        c.progress(1); c.done(3);
+      };
+      const hold = () => {
+        relayed = false; b.el.classList.add('alert'); b.to('carpet'); b.bounce(); play('wobble');
+        tag.textContent = '🚫 Cinderella: “Aku nggak mau ngunyah!”';
+        princess('cinde', 'Aduh Putri Iris! Jangan tahan makanannya di lidahku ya! Aku Cinderella tidak punya gigi dan tidak mau mengunyah! Ayo serahkan ke geraham Mulan dan Belle!');
+      };
+      hot(layer, 19, 50, 21, 56, { onTap: () => relay('left'), label: 'Oper ke geraham Mulan' });
+      hot(layer, 88, 50, 21, 56, { onTap: () => relay('right'), label: 'Oper ke geraham Belle' });
+      avatar(layer, 'mulan', 19, 67, { pulse: false, onTap: () => relay('left') });
+      avatar(layer, 'belle', 88, 67, { pulse: false, onTap: () => relay('right') });
+      avatar(layer, 'cinde', 74, 62, { pulse: false, d: .2, onTap: () => { play('pop'); princess('cinde', GREET.cinde); } });
+      c.act([
+        { cls: 'slate', label: '😣 Kalau Ditahan di Lidah', on: hold },
+        { cls: 'cinde', label: '👠➡️🦷 Oper Cepat ke Geraham!', on: () => relay(Math.random() < .5 ? 'left' : 'right') }
+      ]);
+    }
+  },
+  {
+    chapter: 'Bab 5 dari 10 · Oper ke Geraham Belakang',
+    title: 'Mulan & Belle yang Punya Gigi Kuat untuk Mengunyah!',
+    text: 'Yang mengunyah bukan Cinderella, tapi <strong>Mulan di Gigi Geraham Kanan</strong> dan <strong>Belle di Gigi Geraham Kiri</strong>! Begitu makanan dioper, mereka bersorak: “Biar kami yang menggiling dengan gigi geraham yang kuat!”',
+    speech: 'Bukan lidah Cinderella yang mengunyah, tapi Gigi Geraham Mulan di kanan dan Gigi Geraham Belle di kiri! Yuk oper makanannya ke pojok belakang!',
     mount(c) {
       const { layer } = c.frame('assets/palace.webp', 'Dua tahta gigi geraham');
       const T = 6; let n = 0;
       const b = bolus(layer, '🍗'); b.show();
       const bar = h('div', { class: 'softbar' }, h('div', { class: 'softbar-label' }, 'Kelembutan: 0%'), h('div', { class: 'bar' }, h('i')));
       layer.append(bar);
-      c.mission('Kunyah 6 kali, kiri dan kanan bergantian', T);
+      c.mission('Giling 6 kali, kiri dan kanan bergantian', T);
       const sides = {};
       const chew = which => {
         play('chew'); b.to(which === 'left' ? 'left' : 'right'); b.bounce();
@@ -401,8 +471,8 @@ const PAGES = [
         $('.softbar-label', bar).textContent = `Kelembutan: ${pct}%`; $('.bar i', bar).style.width = pct + '%';
         if (n === T) {
           b.emoji('✨'); b.soft(); play('sparkle');
-          princess(which === 'left' ? 'mulan' : 'belle', 'Hore! Makanannya sudah halus seperti bubur bintang!');
-          c.done(3);
+          princess(which === 'left' ? 'mulan' : 'belle', 'Hebat! Gigi geraham Mulan dan Belle memang juara menggiling makanan!');
+          c.done(2);
         }
       };
       sides.left = hot(layer, 19, 50, 21, 56, { onTap: () => chew('left'), label: 'Gigi geraham Mulan' });
@@ -410,16 +480,84 @@ const PAGES = [
       avatar(layer, 'mulan', 19, 67, { pulse: false, onTap: () => chew('left') });
       avatar(layer, 'belle', 88, 67, { pulse: false, onTap: () => chew('right') });
       c.act([
-        { cls: 'mulan', label: '🗡️ Kunyah Kanan<br>(Mulan)', on: () => chew('left') },
-        { cls: 'belle', label: '🌹 Kunyah Kiri<br>(Belle)', on: () => chew('right') }
+        { cls: 'mulan', label: '🗡️ Geraham Kanan<br>(Mulan)', on: () => chew('left') },
+        { cls: 'belle', label: '🌹 Geraham Kiri<br>(Belle)', on: () => chew('right') }
       ]);
     }
   },
   {
-    chapter: 'Bab 5 dari 7 · Perosotan Emas',
-    title: 'Sudah Halus? Satu, Dua, Tiga… Glek!',
-    text: 'Kalau sudah halus, jangan disimpan di pipi! <strong>Cinderella</strong> membunyikan lonceng: <em>“Ting! Dorong dengan lidah, lalu meluncur di Perosotan Emas ke perut!”</em>',
-    speech: 'Kalau sudah halus, jangan disimpan di pipi! Cinderella membunyikan lonceng: Ting! Dorong dengan lidah, lalu meluncur di Perosotan Emas ke perut! Satu, dua, tiga, glek!',
+    chapter: 'Bab 6 dari 10 · Ketukan Musik Kres-Kres Cepat ✨',
+    title: 'Jurus 2: Ikuti Irama Musik Kres-Kres Cepat!',
+    text: 'Makan Iris kadang lama karena mengunyahnya berhenti-berhenti. Sekarang Mulan dan Belle menyalakan <strong>Musik Ketukan Cepat</strong>! Gerakkan geraham tanpa berhenti: <em>Kres-Satu! Kres-Dua!</em> … sampai <em>Kres-Delapan!</em>',
+    speech: 'Supaya makannya cepat selesai, jangan berhenti-berhenti saat mengunyah ya! Ayo ikuti irama musik Mulan dan Belle: Kres satu, kres dua, kres tiga, kres empat, sampai delapan kali!',
+    mount(c) {
+      const stage = c.stage; stage.innerHTML = '';
+      let hits = 0, running = false;
+      const squares = [...Array(8)].map((_, i) => h('div', { class: 'beat' }, String(i + 1)));
+      const status = h('div', { class: 'crown-final' }, 'Ketukan kunyah cepat: 0 / 8');
+      const show8 = () => {
+        squares.forEach((s, i) => { const on = hits > i; s.classList.toggle('on', on); s.textContent = on ? '⭐' : String(i + 1); });
+        status.textContent = hits >= 8 ? '🎉 Hebat! 8 ketukan kunyah cepat tanpa berhenti!' : `Ketukan kunyah cepat: ${hits} / 8 (Kres-${hits + 1}!)`;
+        c.progress(hits);
+      };
+      const finish = () => { play('sparkle'); princess('mulan', 'Wah cepat sekali! Kalau Putri Iris mengunyah mengikuti ketukan 1 sampai 8 seperti ini, makannya pasti cepat selesai!'); c.done(3); };
+      const tap = () => { if (running) return; hits = (hits % 8) + 1; play('beat'); show8(); if (hits === 8) finish(); };
+      const auto = () => {
+        if (running) return; running = true; hits = 0; show8();
+        say('Ayo ikut mengunyah cepat bersama Mulan dan Belle! Kres satu, dua, tiga, empat, lima, enam, tujuh, delapan! Halus deh!');
+        const step = () => { hits++; play('beat'); show8(); if (hits >= 8) { running = false; finish(); } else later(step, 650); };
+        later(step, 400);
+      };
+      c.mission('Ketuk kunyah cepat sampai 8 ketukan', 8);
+      stage.append(h('div', { class: 'cardstage' },
+        h('div', { class: 'row-label' }, '🎵⚡ Metronom Musik Kunyah Cepat Mulan & Belle'),
+        h('div', { class: 'beats' }, squares), status,
+        h('div', { class: 'row-label' }, 'Gerakkan rahang mengikuti hitungan 1 sampai 8, tanpa jeda bengong ya!')));
+      c.act([
+        { cls: 'mulan', label: '🎵 Mainkan 8 Ketukan!', on: auto },
+        { cls: 'belle', label: '🦷 Ketuk Kunyah Cepat (+1)', on: tap }
+      ]);
+    }
+  },
+  {
+    chapter: 'Bab 7 dari 10 · Sensor Bubur Bintang ✨',
+    title: 'Jurus 3: Cek Sensor Bubur Bintang! Sudah Halus Belum?',
+    text: 'Belle punya <strong>3 tanda</strong> makanan siap ditelan:<br>1️⃣ <strong>Tidak ada yang keras</strong> lagi.<br>2️⃣ Rasanya <strong>licin dan menyatu</strong> seperti Bubur Bintang atau es krim leleh.<br>3️⃣ Sudah <strong>8 kunyahan cepat</strong>. Kalau begitu, <strong>STOP EMUT!</strong>',
+    speech: 'Bagaimana cara tahu makanan di mulut Iris sudah halus? Coba rasakan! Kalau sudah tidak ada yang keras, dan rasanya sudah licin lembut menyatu seperti Bubur Bintang atau es krim leleh, itu tandanya sudah halus! Jangan diemut lagi ya!',
+    mount(c) {
+      const stage = c.stage; stage.innerHTML = '';
+      const info = [
+        ['🍗🧱', '1. Masih Utuh', 'Keras! Oper ke geraham', 'tex1', 'Tahap satu: Makanannya masih utuh dan keras. Jangan ditahan di lidah ya, langsung oper ke geraham!'],
+        ['🥘🦷', '2. Setengah Halus', 'Masih kriuk. Kunyah lagi!', 'tex2', 'Tahap dua: Makanannya mulai lumat digiling Mulan dan Belle. Ayo kunyah sedikit lagi!'],
+        ['✨🥣✨', '3. Bubur Bintang!', 'Licin! STOP EMUT, TELAN!', 'tex3', '']
+      ];
+      const status = h('div', { class: 'crown-final' }, 'Ketuk tiap tahap untuk merasakan bedanya');
+      c.mission('Ketuk 3 tahap sampai Bubur Bintang', 3);
+      const seen = new Set();
+      const cards = info.map(([e, t, s, cls, sp], i) => {
+        const b = h('button', { class: 'fcard challenge ' + cls }, h('span', { class: 'em' }, e), t, h('small', {}, s));
+        b.addEventListener('click', () => {
+          cards.forEach(x => x.classList.remove('sel')); b.classList.add('sel');
+          seen.add(i); c.progress(seen.size);
+          if (i === 2) {
+            play('bell');
+            status.textContent = '🌟 LULUS SENSOR! Licin seperti Bubur Bintang: jangan diemut, langsung GLEK!';
+            princess('belle', 'Nah, begini rasanya kalau sudah halus: sudah tidak ada yang keras, dan terasa licin lembut seperti Bubur Bintang! Kalau sudah begini, jangan diemut lagi ya, langsung telan!');
+            c.done(3);
+          } else { play('pop'); status.textContent = sp.split(': ')[1] || sp; say(sp); }
+        });
+        return b;
+      });
+      stage.append(h('div', { class: 'cardstage' },
+        h('div', { class: 'row-label' }, '🔍 Sensor Tekstur Belle: ketuk untuk lihat bedanya!'),
+        h('div', { class: 'card-grid c3 tall' }, cards), status));
+    }
+  },
+  {
+    chapter: 'Bab 8 dari 10 · Lonceng Perosotan Cinderella',
+    title: 'Sudah Bubur Bintang? Jangan Diemut, Langsung 1, 2, 3… GLEK!',
+    text: 'Begitu makanan jadi <strong>Bubur Bintang yang lembut dan licin</strong>, lonceng Cinderella berbunyi: <em>TING-TING-TING!</em> “Kalau sudah halus, jangan diemut atau ditahan lagi ya! Satu, dua, tiga… GLEK! Meluncur ke perut!”',
+    speech: 'Ting ting ting! Lonceng Cinderella berbunyi! Kalau makanannya sudah lembut seperti Bubur Bintang, jangan diemut lagi! Ayo satu, dua, tiga, glek! Langsung telan meluncur ke perut!',
     mount(c) {
       const { layer } = c.frame('assets/palace.webp', 'Perosotan emas Cinderella');
       const b = bolus(layer, '🥣'); b.soft(); b.show();
@@ -428,20 +566,20 @@ const PAGES = [
       const go = async () => {
         if (busy) return; busy = true;
         await swallowSequence(b);
-        play('bell'); princess('cinde', 'Satu, dua, tiga, glek! Makanan halus meluncur ke perut!');
+        play('bell'); princess('cinde', 'Satu, dua, tiga, glek! Pintar sekali tidak diemut lagi! Bubur Bintang langsung meluncur ke perut!');
         c.done(2);
         await wait(1200); b.reset('🥣'); b.soft(); b.show(); busy = false;
       };
       hot(layer, 62, 40, 16, 40, { onTap: go, label: 'Perosotan emas' });
-      avatar(layer, 'cinde', 74, 62, { onTap: go, d: .2 });
-      c.act([{ cls: 'cinde', label: '👠 1, 2, 3… GLEK! Meluncur!', on: go }]);
+      avatar(layer, 'cinde', 76, 64, { onTap: go, d: .2 });
+      c.act([{ cls: 'cinde', label: '👠 Sudah Halus! 1, 2, 3… GLEK!', on: go }]);
     }
   },
   {
-    chapter: 'Bab 6 dari 7 · Rahasia Kehebatan Iris',
-    title: 'Iris Sudah Jago! Pasti Bisa Juga!',
-    text: '<strong>Belle</strong> berkata: “Gigi geraham Iris sebenarnya <strong>kuat</strong>! Buktinya Iris pintar mengunyah buah, udon, donat, dan pempek kulit. Nasi goreng, telur, dan ayam pasti bisa juga!”',
-    speech: 'Belle berkata: Gigi geraham Iris sebenarnya kuat! Buktinya Iris pintar mengunyah buah, udon, donat, dan pempek kulit. Nasi goreng, telur, dan ayam pasti bisa juga!',
+    chapter: 'Bab 9 dari 10 · Tantangan Menu Juara Iris',
+    title: 'Taklukkan Nasi Goreng, Ayam & Telur dengan Cepat!',
+    text: 'Iris sudah jago <strong>Buah, Udon, Donat, dan Pempek Kulit</strong>. Dengan jurus <strong>Oper dari Lidah → Kunyah Cepat 8 Ketukan → Cek Bubur Bintang → Langsung Glek</strong>, menu apa pun jadi cepat habis!',
+    speech: 'Dengan jurus oper dari lidah Cinderella, kunyah cepat delapan ketukan, dan sensor Bubur Bintang, Putri Iris pasti bisa menghabiskan nasi goreng, daging ayam, dan telur dengan cepat!',
     mount(c) {
       const stage = c.stage; stage.innerHTML = '';
       const done = [['🍎', 'Buah'], ['🍜', 'Udon'], ['🍩', 'Donat'], ['🥟', 'Pempek Kulit']];
@@ -452,37 +590,36 @@ const PAGES = [
       const row2 = h('div', { class: 'card-grid c3' }, tough.map(([e, n]) => {
         const b = h('button', { class: 'fcard challenge', 'aria-label': n }, h('span', { class: 'em' }, e), n, h('small', {}, 'Ketuk aku!'));
         b.addEventListener('click', () => {
-          play('sparkle'); b.classList.add('on'); $('small', b).textContent = '💪 Siap dikunyah!';
-          if (!hit.has(n)) { hit.add(n); c.progress(hit.size); if (hit.size === 3) { princess('belle', 'Hebat! Nasi goreng, telur, dan ayam sudah bangun semua. Putri Iris pasti bisa!'); c.done(3); } else say(`${n} siap dikunyah bersama Mulan dan Belle!`); }
+          play('sparkle'); b.classList.add('on'); $('small', b).textContent = '⭐ Siap cepat!';
+          if (!hit.has(n)) { hit.add(n); c.progress(hit.size); if (hit.size === 3) { princess('belle', 'Hore! Oper dari lidah Cinderella ke geraham, kunyah delapan ketukan cepat, dan begitu jadi Bubur Bintang langsung glek!'); c.done(3); } else say(`${n} siap dijadikan Bubur Bintang bersama Mulan dan Belle!`); }
         });
         return b;
       }));
-      stage.append(h('div', { class: 'cardstage' }, h('div', { class: 'row-label' }, '✅ Makanan yang Iris sudah jago mengunyahnya:'), row1, h('div', { class: 'row-label' }, '🏆 Tantangan baru yang siap Iris taklukkan:'), row2));
+      stage.append(h('div', { class: 'cardstage' }, h('div', { class: 'row-label' }, '✅ Makanan yang Iris sudah jago:'), row1, h('div', { class: 'row-label' }, '🏆 Menu yang siap diubah jadi Bubur Bintang cepat:'), row2));
     }
   },
   {
-    chapter: 'Bab 7 dari 7 · Janji Mahkota',
-    title: 'Janji 4 Jurus Makan Hebat Putri Iris',
-    text: 'Semua Princess bertepuk tangan untuk <strong>Putri Iris</strong>! Ingat 4 jurus Princess saat makan. Ketuk tiap jurus untuk berjanji!',
-    speech: 'Semua Princess bertepuk tangan untuk Putri Iris! Ingat empat jurus Princess saat makan. Ketuk setiap jurus untuk berjanji!',
+    chapter: 'Bab 10 dari 10 · Mahkota Kecepatan Putri Iris',
+    title: 'Janji Baru Putri Iris: Tidak Tahan di Lidah & Tidak Diemut Lama!',
+    text: 'Selamat <strong>Putri Iris</strong>! Sekarang Iris naik ke <strong>Level 2 Kerajaan Princess</strong>! Ketuk tiap janji cepat untuk menerima <strong>Sertifikat Putri Kunyah Sigap &amp; Telan Tepat Waktu</strong>.',
+    speech: 'Selamat Putri Iris sayang! Ingat janji kita hari ini: Satu, jangan tahan makanan di lidah Cinderella, langsung oper ke geraham! Dua, kunyah dengan ketukan cepat Mulan dan Belle! Tiga, kalau sudah lembut licin seperti Bubur Bintang, jangan diemut lagi, langsung satu, dua, tiga, glek!',
     mount(c) {
       const stage = c.stage; stage.innerHTML = '';
       const vows = [
-        ['🥄', 'Pegang sendok sendiri', 'Satu, pegang sendok sendiri!'],
-        ['👑', 'Duduk anggun & fokus', 'Dua, duduk anggun dan fokus, tanpa tolah-toleh!'],
-        ['🦷', 'Giling di geraham belakang', 'Tiga, giling di geraham belakang bersama Mulan dan Belle!'],
-        ['👠', 'Sudah halus, langsung telan!', 'Empat, kalau sudah halus langsung telan bersama Cinderella!']
+        ['👠', 'Cinderella tidak mau mengunyah: oper ke geraham!', 'Satu, jangan tahan makanan di lidah Cinderella, langsung oper ke geraham!'],
+        ['🎵', 'Kunyah ikut ketukan cepat Mulan & Belle', 'Dua, kunyah dengan ketukan cepat Mulan dan Belle, tanpa melamun!'],
+        ['🥣', 'Licin seperti Bubur Bintang? STOP EMUT, GLEK!', 'Tiga, kalau sudah lembut licin seperti Bubur Bintang, jangan diemut lagi, langsung satu, dua, tiga, glek!']
       ];
       const ok = new Set();
       const final = h('div', { class: 'crown-final' }, '');
-      c.mission('Ketuk 4 jurus untuk berjanji', 4);
-      const grid = h('div', { class: 'card-grid c2' }, vows.map(([e, n, s], i) => {
+      c.mission('Ketuk 3 janji cepat', 3);
+      const grid = h('div', { class: 'card-grid c3 tall' }, vows.map(([e, n, s], i) => {
         const b = h('button', { class: 'fcard challenge vow', 'aria-label': n }, h('span', { class: 'em' }, e), n);
         b.addEventListener('click', () => {
           b.classList.add('on'); play('sparkle'); say(s);
           if (!ok.has(i)) {
             ok.add(i); c.progress(ok.size);
-            if (ok.size === 4) { later(() => { final.textContent = '👑 Mahkota Putri Iris menyala! 👑'; play('fanfare'); confetti(60); c.done(4); }, 1700); }
+            if (ok.size === 3) later(() => { final.textContent = '👑 Sertifikat Level 2 untuk Putri Iris! 👑'; play('fanfare'); confetti(60); c.done(4); }, 1700);
           }
         });
         return b;
@@ -575,16 +712,21 @@ document.addEventListener('keydown', e => {
 
 /* =========================================================
    TEMAN MAKAN
+   alur: suap sendiri → (lidah Cinderella) oper ke geraham → kunyah cepat → sensor Bubur Bintang → telan
    ========================================================= */
-const meal = { food: FOODS[0], phase: 'ready', chews: 0, target: 8, bolus: null, layer: null, frame: null, side: 0, auto: false, autoT: 0, t0: 0, tick: 0, busy: false, sides: {}, hotSlide: null, tag: null, softbar: null };
+const meal = { food: FOODS[0], phase: 'ready', chews: 0, target: 8, bolus: null, layer: null, frame: null, side: 0, auto: false, autoT: 0, t0: 0, biteAt: 0, phaseAt: 0, warned: false, tick: 0, busy: false, sides: {}, hotSlide: null, tag: null, softbar: null };
 
 function enterMeal() {
   const stage = $('#mealStage');
   const { frame, layer } = mountFrame(stage, 'assets/palace.webp', 'Istana mulut Putri Iris');
   meal.frame = frame; meal.layer = layer; meal.busy = false; meal.auto = false; meal.chews = 0;
   meal.tag = h('div', { class: 'tag-pill' }, '');
-  meal.softbar = h('div', { class: 'softbar' }, h('div', { class: 'softbar-label' }, 'Kelembutan: 0%'), h('div', { class: 'bar' }, h('i')));
+  meal.softbar = h('div', { class: 'softbar' }, h('div', { class: 'softbar-label' }, ''), h('div', { class: 'bar' }, h('i')));
   layer.append(meal.tag, meal.softbar);
+  hot(layer, 52, 78, 34, 22, { pulse: false, label: 'Karpet lidah Cinderella', onTap: () => {
+    if (meal.phase === 'tongue') relay(meal.side ? 'right' : 'left');
+    else princess('cinde', 'Ingat ya Putri Iris, aku di lidah tidak mau mengunyah! Tugasku cuma mengoper makanan ke geraham Mulan dan Belle!');
+  } });
   meal.sides.left = hot(layer, 19, 50, 21, 56, { onTap: () => chew('left'), pulse: false, label: 'Gigi geraham Mulan' });
   meal.sides.right = hot(layer, 88, 50, 21, 56, { onTap: () => chew('right'), pulse: false, label: 'Gigi geraham Belle' });
   meal.hotSlide = hot(layer, 62, 40, 16, 40, { onTap: () => { if (meal.phase === 'swallow') swallowNow(); }, pulse: false, label: 'Perosotan emas' });
@@ -616,19 +758,18 @@ function renderFoods() {
 }
 
 function setPhase(p) {
-  meal.phase = p;
+  meal.phase = p; meal.phaseAt = Date.now(); meal.warned = false;
   const card = $('#stepCard');
   card.className = 'step-card s-' + p;
   const acts = $('#stepActions'); acts.innerHTML = '';
-  const art = (e) => { const a = $('#stepArt'); a.innerHTML = ''; a.append(h('span', {}, e)); };
+  const art = e => { const a = $('#stepArt'); a.innerHTML = ''; a.append(h('span', {}, e)); };
   clearInterval(meal.autoT); meal.autoT = 0;
-  Object.values(meal.sides).forEach(s => s.classList.toggle('pulse', p === 'chew'));
+  Object.values(meal.sides).forEach(s => s.classList.toggle('pulse', p === 'tongue' || p === 'chew'));
   meal.hotSlide.classList.toggle('pulse', p === 'swallow');
-  meal.softbar.style.visibility = p === 'ready' ? 'hidden' : 'visible';
+  meal.softbar.style.visibility = p === 'ready' || p === 'tongue' ? 'hidden' : 'visible';
 
   if (p === 'ready') {
-    $('#stepNum').textContent = '1';
-    art(meal.food.emoji);
+    $('#stepNum').textContent = '1A'; art(meal.food.emoji);
     $('#stepTitle').textContent = 'Iris suap sendiri!';
     $('#stepSub').textContent = meal.food.desc;
     meal.tag.textContent = `${meal.food.emoji} Langkah 1: suap sendiri pakai Sendok Sihir`;
@@ -637,14 +778,23 @@ function setPhase(p) {
     b.addEventListener('click', startBite);
     acts.append(b);
   }
+  if (p === 'tongue') {
+    $('#stepNum').textContent = '1B'; art('👠');
+    $('#stepTitle').textContent = 'Jangan parkir di lidah Cinderella!';
+    $('#stepSub').textContent = '👠 Di lidah 0 dtk. Ayo oper ke geraham Mulan & Belle!';
+    meal.tag.textContent = '🚫 Cinderella di lidah tidak mau mengunyah!';
+    const b = h('button', { class: 'big-btn sky glow' }, '👠➡️🦷 Oper dari Lidah ke Geraham!');
+    b.addEventListener('click', () => relay(meal.side ? 'right' : 'left'));
+    acts.append(b);
+  }
   if (p === 'chew') {
     $('#stepNum').textContent = '2'; art('🦷');
-    $('#stepSub').textContent = 'Oper ke geraham belakang, lalu kres-kres bersama Mulan & Belle!';
-    meal.tag.textContent = '🦷 Langkah 2: giling di geraham belakang';
-    const m = h('button', { class: 'act-btn mulan' }, h('span', {}, '🗡️ Mulan'), h('small', {}, 'Kres-kres!'));
+    $('#stepSub').textContent = 'Kunyah cepat tanpa berhenti bersama Mulan & Belle: kres-kres!';
+    meal.tag.textContent = '🦷 Langkah 2: giling cepat di geraham belakang';
+    const m = h('button', { class: 'act-btn mulan' }, h('span', {}, '🗡️ Mulan'), h('small', {}, 'Kres cepat!'));
     const bl = h('button', { class: 'act-btn belle' }, h('span', {}, '🌹 Belle'), h('small', {}, 'Giling halus!'));
     m.addEventListener('click', () => chew('left')); bl.addEventListener('click', () => chew('right'));
-    const auto = h('label', { class: 'auto-toggle' }, h('input', { type: 'checkbox' }), 'Irama kunyah otomatis');
+    const auto = h('label', { class: 'auto-toggle' }, h('input', { type: 'checkbox' }), '🎵 Ketukan cepat otomatis');
     $('input', auto).checked = meal.auto;
     $('input', auto).addEventListener('change', e => { meal.auto = e.target.checked; autoChew(); });
     acts.append(m, bl, auto);
@@ -652,10 +802,10 @@ function setPhase(p) {
     autoChew();
   }
   if (p === 'swallow') {
-    $('#stepNum').textContent = '3'; art('👠');
-    $('#stepTitle').textContent = 'Sudah halus! Telan bersama Cinderella';
-    $('#stepSub').textContent = 'Jangan disimpan di pipi. Ketuk tombol, lalu telan saat aba-aba “glek”!';
-    meal.tag.textContent = '👠 Langkah 3: 1, 2, 3… glek!';
+    $('#stepNum').textContent = '3'; art('🥣');
+    $('#stepTitle').textContent = 'TING-TING! Sudah jadi Bubur Bintang!';
+    $('#stepSub').textContent = '🥣 Sudah halus 0 dtk! Jangan diemut, ayo GLEK!';
+    meal.tag.textContent = '🥣 Langkah 3: licin? STOP EMUT, 1, 2, 3… glek!';
     const b = h('button', { class: 'big-btn purple glow' }, '👠 1, 2, 3… GLEK!');
     b.addEventListener('click', swallowNow);
     acts.append(b);
@@ -664,55 +814,73 @@ function setPhase(p) {
 
 function startBite() {
   if (meal.busy) return;
-  if (!meal.t0) meal.t0 = Date.now();
-  play('pop');
-  meal.chews = 0; meal.target = meal.food.target; meal.side = 0;
+  const now = Date.now();
+  if (!meal.t0) meal.t0 = now;
+  meal.biteAt = now; meal.chews = 0; meal.target = meal.food.target; meal.side = 0;
+  play('sparkle'); addStars(1);
   const b = meal.bolus; b.reset(meal.food.emoji);
-  // dari sendok (mulut) → tengah → geraham
   b.to('mouth'); b.show(); b.bounce();
-  later(() => { b.to('carpet'); play('chew'); }, 450);
-  later(() => b.to('left'), 1000);
-  $('.softbar-label', meal.softbar).textContent = 'Kelembutan: 0%'; $('.bar i', meal.softbar).style.width = '0%';
+  later(() => { b.to('carpet'); b.el.classList.add('alert'); play('wobble'); }, 450);
+  setPhase('tongue');
+  updateTimer();
+}
+
+/* Cinderella mengoper makanan dari lidah ke geraham */
+function relay(side) {
+  if (meal.phase !== 'tongue' || meal.busy) return;
+  meal.bolus.el.classList.remove('alert');
+  meal.bolus.to(side); meal.bolus.bounce();
+  meal.side = side === 'left' ? 0 : 1; meal.chews = 0;
+  play('sparkle'); addStars(2);
   setPhase('chew');
+  toast('🗡️', 'Hore! Sudah dioper ke geraham!', 'Cinderella lega, lidahnya bersih. Sekarang kunyah cepat bersama Mulan dan Belle!', false);
 }
 
 function updateChewUI() {
   const pct = Math.round(meal.chews / meal.target * 100);
-  $('#stepTitle').textContent = `Giling di geraham · ${meal.chews}/${meal.target}`;
-  $('.softbar-label', meal.softbar).textContent = `Kelembutan: ${pct}%`;
+  $('#stepTitle').textContent = `Giling cepat di geraham · ${meal.chews}/${meal.target}`;
+  const lab = $('.softbar-label', meal.softbar);
+  const st = pct < 35 ? 1 : pct < 100 ? 2 : 3;
+  lab.textContent = st === 1 ? `🍗🧱 Masih kasar · ${pct}%` : st === 2 ? `🥘 Setengah lumat · ${pct}%` : '✨🥣 Bubur Bintang!';
+  meal.softbar.className = 'softbar s' + st;
   $('.bar i', meal.softbar).style.width = pct + '%';
 }
 
 function chew(which) {
-  if (meal.phase !== 'chew' || meal.busy) return;
+  if (meal.busy) return;
+  if (meal.phase === 'tongue') relay(which);
+  if (meal.phase !== 'chew') return;
   const el = meal.sides[which];
   play('chew'); meal.bolus.to(which); meal.bolus.bounce();
   el.classList.remove('chewing'); void el.offsetWidth; el.classList.add('chewing');
   floatText(meal.layer, 'Kres!', which === 'left' ? 19 : 88, 40);
   meal.chews++; updateChewUI();
   if (meal.chews >= meal.target) {
-    meal.bolus.emoji('✨'); meal.bolus.soft(); play('sparkle');
+    meal.bolus.emoji('🥣'); meal.bolus.soft(); play('bell');
     setPhase('swallow');
+    toast('🥣', 'TING-TING! Sensor Bubur Bintang: sudah halus!', 'Rasakan di mulut Iris: tidak ada yang keras dan sudah licin seperti Bubur Bintang! Jangan diemut lagi ya, satu, dua, tiga… glek!', true);
   }
 }
 function autoChew() {
   clearInterval(meal.autoT); meal.autoT = 0;
   if (!meal.auto || meal.phase !== 'chew') return;
-  meal.autoT = setInterval(() => { meal.side ^= 1; chew(meal.side ? 'right' : 'left'); }, 1100);
+  meal.autoT = setInterval(() => { meal.side ^= 1; chew(meal.side ? 'right' : 'left'); }, 1150);
 }
 
 async function swallowNow() {
   if (meal.phase !== 'swallow' || meal.busy) return;
   meal.busy = true;
+  const secs = Math.floor((Date.now() - meal.biteAt) / 1000);
   $('#stepActions').innerHTML = '';
   await swallowSequence(meal.bolus);
-  bitesRec.n++; saveBites(); addStars(1); updateBites();
+  bitesRec.n++; saveBites(); addStars(4); updateBites();
   const line = PRAISE[(bitesRec.n - 1) % PRAISE.length];
-  play('bell'); toast('🌟', 'Suapan ke-' + bitesRec.n, line, true);
+  play('bell'); toast('👑', `GLEK! Suapan ke-${bitesRec.n} selesai dalam ${secs} detik!`, `${line} Tidak ditahan di lidah, dikunyah cepat, langsung ditelan saat jadi Bubur Bintang! (+4 bintang)`, true);
   meal.busy = false;
   if (bitesRec.n >= S.goal && !bitesRec.fin) { bitesRec.fin = 1; saveBites(); setPhase('ready'); later(finale, 900); return; }
   if (bitesRec.n % 5 === 0) confetti(20);
   setPhase('ready');
+  updateTimer();
 }
 
 function updateBites() {
@@ -720,9 +888,27 @@ function updateBites() {
   $('#biteText').textContent = `${n} / ${g}`;
   $('#biteBar').style.width = Math.min(100, n / g * 100) + '%';
 }
+const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 function updateTimer() {
-  const s = meal.t0 ? Math.floor((Date.now() - meal.t0) / 1000) : 0;
-  $('#mealTimer').textContent = `⏱ ${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  const now = Date.now();
+  const bite = meal.phase === 'ready' || !meal.biteAt ? 0 : Math.floor((now - meal.biteAt) / 1000);
+  const total = meal.t0 ? Math.floor((now - meal.t0) / 1000) : 0;
+  $('#mealTimer').textContent = `⏱ ${fmt(bite)} · 🍽 ${fmt(total)}`;
+  if (meal.busy) return;
+  const n = Math.floor((now - meal.phaseAt) / 1000);
+  if (meal.phase === 'tongue') {
+    $('#stepSub').textContent = `👠 Di lidah ${n} dtk. Ayo oper ke geraham Mulan & Belle!`;
+    if (n >= 4 && !meal.warned) {
+      meal.warned = true; play('wobble');
+      toast('👠', 'Cinderella di Lidah Memanggil Iris!', 'Eh Putri Iris sayang, kok makanannya masih parkir di lidahku? Aku Cinderella tidak mau mengunyah lho! Ayo sekarang serahkan ke gigi geraham Mulan dan Belle!', true);
+    }
+  } else if (meal.phase === 'swallow') {
+    $('#stepSub').textContent = `🥣 Sudah halus ${n} dtk! Jangan diemut, ayo GLEK!`;
+    if (n >= 5 && !meal.warned) {
+      meal.warned = true; play('bell');
+      toast('🥣', 'Ting-Ting! Jangan Diemut Lagi Ya!', 'Putri Iris, makanannya sudah halus jadi Bubur Bintang lho! Jangan diemut lagi ya, nanti rasanya hilang! Ayo satu, dua, tiga, glek!', true);
+    }
+  }
 }
 
 function finale() {
@@ -740,8 +926,8 @@ $('#finaleDone').addEventListener('click', () => {
 
 /* tombol panggilan Princess untuk orang tua */
 $$('.cue').forEach(b => b.addEventListener('click', () => {
-  const key = b.dataset.cue, [who, msg] = CUES[key];
-  play(key === 'swallow' ? 'bell' : 'sparkle'); princess(who, msg);
+  const key = b.dataset.cue, [av, title, msg] = CUES[key];
+  play(key === 'smooth' ? 'bell' : key === 'speed' ? 'beat' : 'sparkle'); toast(av, title, msg, true);
   if (meal.frame) {
     const cls = key === 'posture' ? 'shake' : key === 'focus' ? 'dim' : '';
     if (cls) { meal.frame.classList.add(cls); later(() => meal.frame.classList.remove(cls), 1600); }
@@ -795,6 +981,24 @@ $('#setAutoRead').addEventListener('change', e => { S.autoRead = e.target.checke
 $('#setSound').addEventListener('change', e => { S.sound = e.target.checked; store.set('sound', S.sound); syncSound(); });
 $('#setResetBites').addEventListener('click', () => { bitesRec = { d: localDay(), n: 0, fin: 0 }; saveBites(); meal.t0 = 0; updateBites(); updateTimer(); enterHome(); });
 $('#setResetAll').addEventListener('click', () => { if (confirm('Reset semua bintang Iris menjadi 0?')) { S.stars = 0; store.set('stars', 0); updateStars(); enterHome(); } });
+
+/* pengaturan suara Princess */
+(() => {
+  const dlg = $('#voiceDlg'), pitch = $('#voicePitch'), rate = $('#voiceRate'), chime = $('#voiceChime'), sel = $('#voiceSelect');
+  const sync = () => { pitch.value = S.pitch; rate.value = S.rate; $('#voicePitchVal').textContent = S.pitch; $('#voiceRateVal').textContent = S.rate; chime.checked = S.chime; };
+  $('#btnVoice').addEventListener('click', () => { actx(); loadVoices(); sync(); dlg.showModal(); });
+  const close = () => { hush(); dlg.close(); };
+  $('#voiceClose').addEventListener('click', close); $('#voiceSave').addEventListener('click', close);
+  dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
+  pitch.addEventListener('input', () => { S.pitch = parseFloat(pitch.value); store.set('pitch', S.pitch); $('#voicePitchVal').textContent = S.pitch; });
+  rate.addEventListener('input', () => { S.rate = parseFloat(rate.value); store.set('rate', S.rate); $('#voiceRateVal').textContent = S.rate; });
+  sel.addEventListener('change', () => { S.voiceURI = sel.value; store.set('voiceURI', S.voiceURI); });
+  chime.addEventListener('change', () => { S.chime = chime.checked; store.set('chime', S.chime); });
+  $('#voiceTest').addEventListener('click', () => {
+    play('sparkle');
+    if (S.chime) play('bell'); else say('Halo Putri Iris sayang! Ini suara Princess yang ceria! Ingat ya, jangan tahan makanan di lidah Cinderella, langsung oper ke geraham Mulan dan Belle!');
+  });
+})();
 
 /* cegah zoom cubit (ketukan cepat tetap diterima: touch-action: manipulation) */
 document.addEventListener('gesturestart', e => e.preventDefault());

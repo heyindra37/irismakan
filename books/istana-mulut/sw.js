@@ -1,6 +1,6 @@
 /* Service worker: aplikasi tetap bisa dibuka tanpa internet.
    Naikkan VERSION setiap kali ada perubahan file agar cache diperbarui. */
-const VERSION = 'istana-mulut-v1';
+const VERSION = 'istana-mulut-v2';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
   'assets/hero.webp', 'assets/palace.webp', 'assets/icon-192.png', 'assets/icon-512.png', 'assets/apple-touch-icon.png'];
 
